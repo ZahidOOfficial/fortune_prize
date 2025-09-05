@@ -122,6 +122,8 @@ class _ImageWheelState extends State<ImageWheel> {
       await player.setReleaseMode(ReleaseMode.loop);
       await player.play(AssetSource("sounds/correct2.wav"));
 
+      final mediaQuerySize = MediaQuery.of(context).size;
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -152,16 +154,18 @@ class _ImageWheelState extends State<ImageWheel> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
-                backgroundColor: Colors.white.withOpacity(0.75),
-                contentPadding: EdgeInsets.all(20.w), // responsive padding
+                backgroundColor: Colors.white.withValues(alpha: 0.75),
+                contentPadding: EdgeInsets.all(mediaQuerySize.width * 0.05),
                 content: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: 0.85.sw, // screen width ka 85%
-                        maxHeight: 0.70.sh, // screen height ka 70%
+                        maxWidth:
+                            mediaQuerySize.width *
+                            0.85, // ✅ screen width ka 85%
+                        maxHeight: mediaQuerySize.height * 0.70,
                       ),
                       child: SingleChildScrollView(
                         child: Padding(
@@ -313,7 +317,7 @@ class _ImageWheelState extends State<ImageWheel> {
                         for (int i = 0; i < names.length; i++)
                           FortuneItem(
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 50.0),
+                              padding: const EdgeInsets.only(right: 35.0),
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: SizedBox(
