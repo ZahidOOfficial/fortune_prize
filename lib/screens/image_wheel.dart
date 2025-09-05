@@ -55,10 +55,10 @@ class _ImageWheelState extends State<ImageWheel> {
     "assets/images/Movcol.png",
     "assets/images/Velso.png",
     "assets/images/Wymly.png",
+    "assets/images/Prize.png",
     "assets/images/Olride.png",
     "assets/images/Salzina.png",
     "assets/images/I_Pill.png",
-    "assets/images/Prize.png",
   ];
 
   int selected = 0;
