@@ -1,0 +1,1 @@
+enum EScreenDirection { rtl, ltr }

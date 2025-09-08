@@ -3,9 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:wheel_app/screens/image_wheel.dart';
-import 'package:wheel_app/screens/spinner_screen.dart';
-import 'package:wheel_app/screens/test_page.dart';
-import 'package:wheel_app/screens/wheel_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +29,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Survey Form',
+          title: 'SPIN N WIN',
           home: ImageWheel(),
         );
       },

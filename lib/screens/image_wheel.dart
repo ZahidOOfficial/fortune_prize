@@ -7,7 +7,6 @@ import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
 class ImageWheel extends StatefulWidget {
@@ -33,18 +32,19 @@ class _ImageWheelState extends State<ImageWheel> {
   ];
 
   final List<Color> colors = [
-    Colors.white,
-    Colors.pink.shade100,
+    Color(0xFFffe5ff),
+    Color(0xFFfeefd0),
     // Colors.purple.shade100,
-    Colors.greenAccent.shade100,
-    Colors.yellow.shade100,
-    Colors.orange.shade200,
-    Colors.amber.shade100,
-    Colors.lightBlueAccent.shade100,
-    Colors.teal.shade100,
-    Colors.lime.shade100,
-    Colors.indigo.shade100,
-    Colors.red.shade100,
+    Color(0xffafda95),
+    Color(0xffc7e2f6),
+    Color(0xff8fe1ff),
+    Color(0xfff09ea5),
+    Color(0xffc4b4db),
+    Colors.white,
+    Color(0xffaffaff),
+
+    Color(0xfffdf3b1),
+    Color(0xffb3e0fc),
   ];
 
   final List<String> images = [
@@ -118,9 +118,14 @@ class _ImageWheelState extends State<ImageWheel> {
         isSpinning = false;
       });
 
-      _confettiController.play();
-      await player.setReleaseMode(ReleaseMode.loop);
-      await player.play(AssetSource("sounds/correct2.wav"));
+      if (names.indexOf("Prize") == selected) {
+        _confettiController.play();
+        await player.setReleaseMode(ReleaseMode.loop);
+        await player.play(AssetSource("sounds/correct2.wav"));
+      } else {
+        await player.setReleaseMode(ReleaseMode.release);
+        await player.play(AssetSource("sounds/better_luck.mp3"));
+      }
 
       final mediaQuerySize = MediaQuery.of(context).size;
 
@@ -130,32 +135,38 @@ class _ImageWheelState extends State<ImageWheel> {
         builder: (ctx) {
           return Stack(
             children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(4, (index) {
-                    return ConfettiWidget(
-                      confettiController: _confettiController,
-                      blastDirection: pi / 2,
-                      emissionFrequency: 0.2,
-                      numberOfParticles: 60,
-                      gravity: 0.2,
-                      shouldLoop: true,
-                      colors: colors,
-                      blastDirectionality: BlastDirectionality.explosive,
-                    );
-                  }),
+              if (names.indexOf("Prize") == selected)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(4, (index) {
+                      return ConfettiWidget(
+                        confettiController: _confettiController,
+                        blastDirection: pi / 2,
+                        emissionFrequency: 0.8,
+                        numberOfParticles: 160,
+                        gravity: 0.2,
+                        shouldLoop: true,
+                        colors: colors,
+                        blastDirectionality: BlastDirectionality.explosive,
+                      );
+                    }),
+                  ),
                 ),
-              ),
               AlertDialog(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
                 backgroundColor: Colors.white.withValues(alpha: 0.75),
-                contentPadding: EdgeInsets.all(mediaQuerySize.width * 0.05),
+                contentPadding: EdgeInsets.only(
+                  left: mediaQuerySize.width * 0.02,
+                  right: mediaQuerySize.width * 0.02,
+                  top: mediaQuerySize.height * 0.03,
+                  bottom: mediaQuerySize.height * 0.02,
+                ),
                 content: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: BackdropFilter(
@@ -165,88 +176,91 @@ class _ImageWheelState extends State<ImageWheel> {
                         maxWidth:
                             mediaQuerySize.width *
                             0.85, // ✅ screen width ka 85%
-                        maxHeight: mediaQuerySize.height * 0.70,
+                        // maxHeight: mediaQuerySize.height * 0.70,
                       ),
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(35.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // ✅ Winner ki image
-                              Image.asset(
-                                images[selected],
-                                height: 120.h,
-                                fit: BoxFit.contain,
-                              ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.asset(
+                              images[selected],
+                              height: mediaQuerySize.height * 0.25,
+                              fit: BoxFit.contain,
+                            ),
 
-                              SizedBox(height: 12.h),
-
-                              // ✅ Lottie animation
-                              Lottie.asset(
-                                "assets/lottie/Congratulation.json",
-                                repeat: true,
-                                height: 160.h,
-                              ),
-
-                              SizedBox(height: 12.h),
-
-                              Text(
-                                "🎊 Congratulations! 🎊",
-                                style: TextStyle(
-                                  fontSize: 30.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue.shade700,
+                            SizedBox(height: 12.h),
+                            if (names[selected] == "Prize") ...[
+                              Transform.scale(
+                                scale: 6,
+                                child: Lottie.asset(
+                                  "assets/lottie/Congratulation.json",
+                                  repeat: true,
+                                  width: mediaQuerySize.width * 0.5,
+                                  height: mediaQuerySize.height * 0.2,
+                                  fit: BoxFit.contain,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
+
+                              SizedBox(height: 12.h),
 
                               SizedBox(height: 8.h),
 
                               Text(
                                 "Winner: ${names[selected]}",
                                 style: TextStyle(
-                                  fontSize: 26.sp,
+                                  fontSize: mediaQuerySize.height * 0.025,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.blue,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-
-                              SizedBox(height: 20.h),
-
-                              ElevatedButton(
-                                onPressed: () {
-                                  _confettiController.stop();
-                                  player.stop();
-                                  setState(() {
-                                    chosenOption = 3;
-                                  });
-                                  Get.back();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 40.w,
-                                    vertical: 14.h,
-                                  ),
-                                  backgroundColor: Colors.blueAccent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(40),
-                                  ),
-                                  shadowColor: Colors.black38,
-                                  elevation: 6,
+                            ] else ...[
+                              Text(
+                                "Better Luck Next Time!",
+                                style: TextStyle(
+                                  fontSize: mediaQuerySize.height * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade700,
                                 ),
-                                child: Text(
-                                  "Restart",
-                                  style: TextStyle(
-                                    fontSize: 20.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
-                          ),
+
+                            // ✅ Lottie animation
+                            SizedBox(height: 20.h),
+
+                            ElevatedButton(
+                              onPressed: () {
+                                _confettiController.stop();
+                                player.stop();
+                                setState(() {
+                                  chosenOption = 3;
+                                });
+                                Get.back();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 40.w,
+                                  vertical: 14.h,
+                                ),
+                                backgroundColor: Colors.blueAccent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                shadowColor: Colors.black38,
+                                elevation: 6,
+                              ),
+                              child: Text(
+                                "Restart",
+                                style: TextStyle(
+                                  fontSize: mediaQuerySize.height * 0.025,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -276,123 +290,134 @@ class _ImageWheelState extends State<ImageWheel> {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // SizedBox(height: 10.h),
-              // Text(
-              //   "🎡 Spin the Wheel",
-              //   style: TextStyle(
-              //     fontSize: 28.sp,
-              //     fontWeight: FontWeight.bold,
-              //     color: Colors.black87,
-              //   ),
-              // ),
-              SizedBox(height: 20.h),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              // spacing: 10,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/images/Genix.gif",
+                      height: mediaQuerySize.height * 0.2,
+                    ),
+                    Text(
+                      "Spin N Win",
+                      style: TextStyle(
+                        fontSize:
+                            mediaQuerySize.width * 0.025, // screen width ka 5%
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1, // always square
+                      child: FortuneWheel(
+                        selected: controller.stream,
+                        animateFirst: false,
+                        duration: const Duration(seconds: 4),
 
-              // Wheel adjust with screen
-              Expanded(
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 1, // always square
-                    child: FortuneWheel(
-                      selected: controller.stream,
-                      animateFirst: false,
-                      duration: const Duration(seconds: 4),
-                      indicators: <FortuneIndicator>[
-                        FortuneIndicator(
-                          alignment: Alignment.topCenter, // pointer ki position
-                          child: TriangleIndicator(
-                            color: Colors.black,
-                            width:
-                                mediaQuerySize.width *
-                                0.03, // ✅ pointer ka width
-                            height:
-                                mediaQuerySize.height *
-                                0.05, // ✅ pointer ka height
+                        indicators: <FortuneIndicator>[
+                          FortuneIndicator(
+                            alignment: Alignment.topCenter,
+                            child: TriangleIndicator(
+                              color: Colors.black,
+                              width: mediaQuerySize.width * 0.03,
+                              height: mediaQuerySize.height * 0.05,
+                            ),
                           ),
-                        ),
-                      ],
-                      items: [
-                        for (int i = 0; i < names.length; i++)
-                          FortuneItem(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 35.0),
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: SizedBox(
-                                  height: mediaQuerySize.height * 0.10,
-                                  width: mediaQuerySize.width * 0.10,
-                                  child: Image.asset(
-                                    images[i],
-                                    fit: BoxFit.contain,
+                        ],
+                        items: [
+                          for (int i = 0; i < names.length; i++)
+                            FortuneItem(
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 35.0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: SizedBox(
+                                    height: mediaQuerySize.height * 0.10,
+                                    width: mediaQuerySize.width * 0.10,
+                                    child: Image.asset(
+                                      images[i],
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
 
-                            style: FortuneItemStyle(
-                              color: colors[i].withValues(alpha: 0.85),
-                              borderColor: Colors.white,
-                              borderWidth: 2,
+                              style: FortuneItemStyle(
+                                color: colors[i],
+                                borderColor: Colors.black45,
+                                borderWidth: 10.w,
+                              ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 30.h),
-
-              ElevatedButton(
-                onPressed: isSpinning ? null : spinWheel,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    horizontal:
-                        mediaQuerySize.width * 0.08, // screen width ka 8%
-                    vertical:
-                        mediaQuerySize.height * 0.02, // screen height ka 2%
+                ElevatedButton(
+                  onPressed: isSpinning ? null : spinWheel,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal:
+                          mediaQuerySize.width * 0.02, // screen width ka 8%
+                      vertical:
+                          mediaQuerySize.height * 0.02, // screen height ka 2%
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        mediaQuerySize.width * 0.1,
+                      ), // responsive radius
+                    ),
+                    backgroundColor:
+                        isSpinning ? Colors.grey : Colors.blueAccent,
+                    elevation: 8,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      mediaQuerySize.width * 0.1,
-                    ), // responsive radius
-                  ),
-                  backgroundColor: isSpinning ? Colors.grey : Colors.blueAccent,
-                  elevation: 8,
-                ),
-                child: Text(
-                  isSpinning ? "Spinning..." : "Spin Now 🚀",
-                  style: TextStyle(
-                    fontSize:
-                        mediaQuerySize.width * 0.015, // screen width ka 5%
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  child: Text(
+                    isSpinning ? "Spinning..." : "Spin Now 🚀",
+                    style: TextStyle(
+                      fontSize:
+                          mediaQuerySize.width * 0.015, // screen width ka 5%
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 20.h),
+                SizedBox(height: 20.h),
 
-              Align(
-                alignment: Alignment.bottomRight,
-                child: GestureDetector(
-                  onTap: () => setState(() => chosenOption = 3), // random
-                  onDoubleTap: () => setState(() => chosenOption = 2), // prize
-                  child: SizedBox(height: 50.h, width: 50.w, child: Text("__")),
-                ),
-              ),
-              if (chosenOption != null)
                 Align(
                   alignment: Alignment.bottomRight,
-                  child: Text(
-                    chosenOption.toString(),
-                    style: TextStyle(fontSize: 8.sp),
+                  child: GestureDetector(
+                    onTap: () => setState(() => chosenOption = 3), // random
+                    onDoubleTap:
+                        () => setState(() => chosenOption = 2), // prize
+                    child: SizedBox(
+                      height: 50.h,
+                      width: 50.w,
+                      child: Text("__"),
+                    ),
                   ),
                 ),
-              SizedBox(height: 20.h),
-            ],
+                if (chosenOption != null)
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      chosenOption.toString(),
+                      style: TextStyle(fontSize: 8.sp),
+                    ),
+                  ),
+                SizedBox(height: 20.h),
+              ],
+            ),
           ),
         ),
       ),
