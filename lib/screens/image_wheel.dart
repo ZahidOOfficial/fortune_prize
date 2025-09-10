@@ -7,6 +7,7 @@ import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
 class ImageWheel extends StatefulWidget {
@@ -279,144 +280,140 @@ class _ImageWheelState extends State<ImageWheel> {
     final mediaQuerySize = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Color(0xFFb3e5fc), Color(0xFF81d4fa)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: GestureDetector(
+        onTap: () => setState(() => chosenOption = 3),
+        onDoubleTap: () => setState(() => chosenOption = 2),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white, Color(0xFFb3e5fc), Color(0xFF81d4fa)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              // spacing: 10,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      "assets/images/Genix.gif",
-                      height: mediaQuerySize.height * 0.2,
-                    ),
-                    Text(
-                      "Spin N Win",
-                      style: TextStyle(
-                        fontSize:
-                            mediaQuerySize.width * 0.025, // screen width ka 5%
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                // spacing: 10,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "assets/images/Genix.gif",
+                        height: mediaQuerySize.height * 0.2,
                       ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Center(
-                    child: AspectRatio(
-                      aspectRatio: 1, // always square
-                      child: FortuneWheel(
-                        selected: controller.stream,
-                        animateFirst: false,
-                        duration: const Duration(seconds: 4),
-
-                        indicators: <FortuneIndicator>[
-                          FortuneIndicator(
-                            alignment: Alignment.topCenter,
-                            child: TriangleIndicator(
-                              color: Colors.black,
-                              width: mediaQuerySize.width * 0.03,
-                              height: mediaQuerySize.height * 0.05,
-                            ),
+                      Text(
+                        "Spin & Win",
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            fontSize: mediaQuerySize.width * 0.035,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            letterSpacing: 1.2,
                           ),
-                        ],
-                        items: [
-                          for (int i = 0; i < names.length; i++)
-                            FortuneItem(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 35.0),
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: SizedBox(
-                                    height: mediaQuerySize.height * 0.10,
-                                    width: mediaQuerySize.width * 0.10,
-                                    child: Image.asset(
-                                      images[i],
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: AspectRatio(
+                        aspectRatio: 1, // always square
+                        child: IgnorePointer(
+                          ignoring: true,
+                          child: FortuneWheel(
+                            selected: controller.stream,
+                            animateFirst: false,
+                            duration: const Duration(seconds: 4),
+
+                            indicators: <FortuneIndicator>[
+                              FortuneIndicator(
+                                alignment: Alignment.topCenter,
+                                child: TriangleIndicator(
+                                  color: Colors.black,
+                                  width: mediaQuerySize.width * 0.03,
+                                  height: mediaQuerySize.height * 0.05,
                                 ),
                               ),
+                            ],
+                            items: [
+                              for (int i = 0; i < names.length; i++)
+                                FortuneItem(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 35.0),
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: SizedBox(
+                                        height: mediaQuerySize.height * 0.10,
+                                        width: mediaQuerySize.width * 0.10,
+                                        child: Image.asset(
+                                          images[i],
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
 
-                              style: FortuneItemStyle(
-                                color: colors[i],
-                                borderColor: Colors.black45,
-                                borderWidth: 10.w,
-                              ),
-                            ),
-                        ],
+                                  style: FortuneItemStyle(
+                                    color: colors[i],
+                                    borderColor: Colors.black45,
+                                    borderWidth: 10.w,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                ElevatedButton(
-                  onPressed: isSpinning ? null : spinWheel,
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal:
-                          mediaQuerySize.width * 0.02, // screen width ka 8%
-                      vertical:
-                          mediaQuerySize.height * 0.02, // screen height ka 2%
+                  ElevatedButton(
+                    onPressed: isSpinning ? null : spinWheel,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal:
+                            mediaQuerySize.width * 0.02, // screen width ka 8%
+                        vertical:
+                            mediaQuerySize.height * 0.02, // screen height ka 2%
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          mediaQuerySize.width * 0.1,
+                        ), // responsive radius
+                      ),
+                      backgroundColor:
+                          isSpinning ? Colors.grey : Colors.blueAccent,
+                      elevation: 8,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        mediaQuerySize.width * 0.1,
-                      ), // responsive radius
-                    ),
-                    backgroundColor:
-                        isSpinning ? Colors.grey : Colors.blueAccent,
-                    elevation: 8,
-                  ),
-                  child: Text(
-                    isSpinning ? "Spinning..." : "Spin Now 🚀",
-                    style: TextStyle(
-                      fontSize:
-                          mediaQuerySize.width * 0.015, // screen width ka 5%
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 20.h),
-
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: GestureDetector(
-                    onTap: () => setState(() => chosenOption = 3), // random
-                    onDoubleTap:
-                        () => setState(() => chosenOption = 2), // prize
-                    child: SizedBox(
-                      height: 50.h,
-                      width: 50.w,
-                      child: Text("__"),
-                    ),
-                  ),
-                ),
-                if (chosenOption != null)
-                  Align(
-                    alignment: Alignment.bottomRight,
                     child: Text(
-                      chosenOption.toString(),
-                      style: TextStyle(fontSize: 8.sp),
+                      isSpinning ? "Spinning..." : "Spin Now 🚀",
+                      style: TextStyle(
+                        fontSize:
+                            mediaQuerySize.width * 0.015, // screen width ka 5%
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                SizedBox(height: 20.h),
-              ],
+
+                  SizedBox(height: 20.h),
+
+                  if (chosenOption != null)
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        chosenOption.toString(),
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
+                    ),
+                  SizedBox(height: 20.h),
+                ],
+              ),
             ),
           ),
         ),
