@@ -297,15 +297,13 @@ class _ImageWheelState extends State<ImageWheel> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                // spacing: 10,
                 children: [
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
                         "assets/images/Genix.gif",
-                        height: mediaQuerySize.height * 0.2,
+                        fit: BoxFit.contain,
                       ),
                       Text(
                         "Spin & Win",
@@ -313,6 +311,7 @@ class _ImageWheelState extends State<ImageWheel> {
                           textStyle: TextStyle(
                             fontSize: mediaQuerySize.width * 0.035,
                             fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
                             color: Colors.black87,
                             letterSpacing: 1.2,
                           ),
@@ -362,7 +361,7 @@ class _ImageWheelState extends State<ImageWheel> {
                                   style: FortuneItemStyle(
                                     color: colors[i],
                                     borderColor: Colors.black45,
-                                    borderWidth: 10.w,
+                                    borderWidth: 3.w,
                                   ),
                                 ),
                             ],
