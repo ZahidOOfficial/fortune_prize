@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,7 +28,7 @@ class _ImageWheelState extends State<ImageWheel> {
   final spinPlayer = AudioPlayer();
   late ConfettiController _confettiController;
   bool isSpinning = false;
-
+  final FocusNode _focusNode = FocusNode();
   Socket? socket;
   RawDatagramSocket? udpSocket;
 
@@ -48,6 +49,7 @@ class _ImageWheelState extends State<ImageWheel> {
     spinPlayer.dispose();
     socket?.destroy();
     udpSocket?.close();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -149,13 +151,20 @@ class _ImageWheelState extends State<ImageWheel> {
 
       final mediaQuerySize = MediaQuery.of(context).size;
 
-      showDialog(
+      final resp = await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (ctx) {
           return _dialogContent(mediaQuerySize);
         },
       );
+      if (resp == null) {
+        _confettiController.stop();
+        player.stop();
+        setState(() {
+          chosenOption = 3;
+        });
+      }
     });
   }
 
@@ -163,155 +172,185 @@ class _ImageWheelState extends State<ImageWheel> {
   Widget build(BuildContext context) {
     final mediaQuerySize = MediaQuery.of(context).size;
 
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Colors.purple.shade200, Color(0xFF81d4fa)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset("assets/images/Genix.gif"),
-                  ),
-                ),
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: 1, // always square
-                    child: Stack(
-                      // 👈 Wrap the wheel with a Stack
-                      children: [
-                        IgnorePointer(
-                          ignoring: true,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade300,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.grey.shade200,
-                                  Colors.grey.shade400,
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(
-                                    0.25,
-                                  ), // shadow color
-                                  blurRadius: 15, // softness of shadow
-                                  spreadRadius: 2, // how wide it spreads
-                                  offset: Offset(
-                                    0,
-                                    8,
-                                  ), // x, y position of shadow
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: FortuneWheel(
-                                selected: controller.stream,
-                                animateFirst: false,
-                                duration: const Duration(seconds: 4),
-                                indicators: <FortuneIndicator>[
-                                  FortuneIndicator(
-                                    alignment: Alignment.center,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: 50.w),
-                                      child: Image.asset(
-                                        "assets/images/s1.png",
-                                        height: 180.h,
-                                      ),
-                                    ),
+    return KeyboardListener(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: (KeyEvent event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.space) {
+          // 👇 spacebar dabane pe option 2 set
+          setState(() {
+            chosenOption = 2;
+          });
+          // Agar yahin se wheel bhi spin karwana ho to:
+          // if (!isSpinning) spinWheel();
+        }
+      },
+      child: Scaffold(
+        body: GestureDetector(
+          onDoubleTap: () {
+            setState(() {
+              chosenOption = 2;
+            });
+          },
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white,
+                  Colors.purple.shade200,
+                  Color(0xFF81d4fa),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset("assets/images/Genix.gif"),
+                      ),
+                    ),
+                    Center(
+                      child: AspectRatio(
+                        aspectRatio: 1, // always square
+                        child: Stack(
+                          // 👈 Wrap the wheel with a Stack
+                          children: [
+                            IgnorePointer(
+                              ignoring: true,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.shade300,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.grey.shade200,
+                                      Colors.grey.shade400,
+                                    ],
                                   ),
-                                ],
-                                items: [
-                                  for (int i = 0; i < names.length; i++)
-                                    FortuneItem(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 30.0,
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: SizedBox(
-                                            height:
-                                                mediaQuerySize.height * 0.10,
-                                            width: mediaQuerySize.width * 0.10,
-                                            child: Image.asset(
-                                              images[i],
-                                              fit: BoxFit.contain,
-                                            ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(
+                                        0.25,
+                                      ), // shadow color
+                                      blurRadius: 15, // softness of shadow
+                                      spreadRadius: 2, // how wide it spreads
+                                      offset: Offset(
+                                        0,
+                                        8,
+                                      ), // x, y position of shadow
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: FortuneWheel(
+                                    selected: controller.stream,
+                                    animateFirst: false,
+                                    duration: const Duration(seconds: 4),
+                                    indicators: <FortuneIndicator>[
+                                      FortuneIndicator(
+                                        alignment: Alignment.center,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            bottom: 50.w,
+                                          ),
+                                          child: Image.asset(
+                                            "assets/images/s1.png",
+                                            height: 180.h,
                                           ),
                                         ),
                                       ),
-                                      style: FortuneItemStyle(
-                                        color: colors[i],
-                                        borderColor: darkColors[i],
-                                        borderWidth: 1.w,
-                                      ),
-                                    ),
-                                ],
+                                    ],
+                                    items: [
+                                      for (int i = 0; i < names.length; i++)
+                                        FortuneItem(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 30.0,
+                                            ),
+                                            child: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: SizedBox(
+                                                height:
+                                                    mediaQuerySize.height *
+                                                    0.10,
+                                                width:
+                                                    mediaQuerySize.width * 0.10,
+                                                child: Image.asset(
+                                                  images[i],
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          style: FortuneItemStyle(
+                                            color: colors[i],
+                                            borderColor: darkColors[i],
+                                            borderWidth: 1.w,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
 
-                        // 🌟 Circular Start Button in Center 🌟
-                        Center(
-                          child: ElevatedButton(
-                            onPressed:
-                                isSpinning
-                                    ? () {}
-                                    : spinWheel, // Disable when spinning
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              shape: const CircleBorder(),
-                              padding: EdgeInsets.all(6.0.w),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                isSpinning ? "Spinning..." : "Start",
-                                style: TextStyle(color: Colors.white),
+                            // 🌟 Circular Start Button in Center 🌟
+                            Center(
+                              child: ElevatedButton(
+                                onPressed:
+                                    isSpinning
+                                        ? () {}
+                                        : spinWheel, // Disable when spinning
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: const CircleBorder(),
+                                  padding: EdgeInsets.all(6.0.w),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    isSpinning ? "Spinning..." : "Start",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Spin & Win",
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
                       ),
                     ),
-                  ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Spin & Win${chosenOption == 2 ? "." : ""}",
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -366,87 +405,143 @@ class _ImageWheelState extends State<ImageWheel> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(30.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        images[selected],
-                        height: mediaQuerySize.height * 0.25,
-                        fit: BoxFit.contain,
-                      ),
-
-                      SizedBox(height: 12.h),
-                      if (names[selected] == "Prize") ...[
-                        Transform.scale(
-                          scale: 6,
-                          child: Lottie.asset(
-                            "assets/lottie/Congratulation.json",
-                            repeat: true,
-                            width: mediaQuerySize.width * 0.5,
-                            height: mediaQuerySize.height * 0.2,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (names[selected] != "Prize") ...[
+                          Text(
+                            "Better Luck Next Time 😢".toUpperCase(),
+                            style: TextStyle(
+                              fontSize: mediaQuerySize.height * 0.1,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        if (names[selected] == "Prize") ...[
+                          Image.asset(
+                            images[selected],
+                            height: mediaQuerySize.height * 0.25,
                             fit: BoxFit.contain,
                           ),
-                        ),
-
-                        SizedBox(height: 12.h),
-
-                        SizedBox(height: 8.h),
-
-                        Text(
-                          "Winner: ${names[selected]}",
-                          style: TextStyle(
-                            fontSize: mediaQuerySize.height * 0.025,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.blue,
+                          Transform.scale(
+                            scale: 6,
+                            child: Lottie.asset(
+                              "assets/lottie/Congratulation.json",
+                              repeat: true,
+                              width: mediaQuerySize.width * 0.5,
+                              height: mediaQuerySize.height * 0.2,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ] else ...[
-                        Text(
-                          "Better Luck Next Time!",
-                          style: TextStyle(
-                            fontSize: mediaQuerySize.height * 0.045,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
+
+                          SizedBox(height: 12.h),
+
+                          SizedBox(height: 8.h),
+
+                          Text(
+                            "Winner".toUpperCase(),
+                            style: TextStyle(
+                              fontSize: mediaQuerySize.height * 0.1,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xff228B22),
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                          SizedBox(height: 12.h),
+
+                          ElevatedButton(
+                            onPressed: () {
+                              _confettiController.stop();
+                              player.stop();
+                              setState(() {
+                                chosenOption = 3;
+                              });
+                              Get.back();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 40.w,
+                                vertical: 14.h,
+                              ),
+                              backgroundColor: Colors.blueAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                              shadowColor: Colors.black38,
+                              elevation: 6,
+                            ),
+                            child: Text(
+                              "Restart",
+                              style: TextStyle(
+                                fontSize: mediaQuerySize.height * 0.025,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ] else ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.black26,
+                                width: 1.w,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  Image.asset(
+                                    images[selected],
+                                    height: mediaQuerySize.height * 0.25,
+                                    fit: BoxFit.contain,
+                                  ),
+
+                                  SizedBox(height: 12.h),
+
+                                  // ✅ Lottie animation
+                                  SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _confettiController.stop();
+                                      player.stop();
+                                      setState(() {
+                                        chosenOption = 3;
+                                      });
+                                      Get.back();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 40.w,
+                                        vertical: 14.h,
+                                      ),
+                                      backgroundColor: Colors.blueAccent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(40),
+                                      ),
+                                      shadowColor: Colors.black38,
+                                      elevation: 6,
+                                    ),
+                                    child: Text(
+                                      "Restart",
+                                      style: TextStyle(
+                                        fontSize: mediaQuerySize.height * 0.025,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
-
-                      // ✅ Lottie animation
-                      SizedBox(height: 20.h),
-
-                      ElevatedButton(
-                        onPressed: () {
-                          _confettiController.stop();
-                          player.stop();
-                          setState(() {
-                            chosenOption = 3;
-                          });
-                          Get.back();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 40.w,
-                            vertical: 14.h,
-                          ),
-                          backgroundColor: Colors.blueAccent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40),
-                          ),
-                          shadowColor: Colors.black38,
-                          elevation: 6,
-                        ),
-                        child: Text(
-                          "Restart",
-                          style: TextStyle(
-                            fontSize: mediaQuerySize.height * 0.025,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
