@@ -38,7 +38,7 @@ class _ImageWheelState extends State<ImageWheel> {
     _confettiController = ConfettiController(
       duration: const Duration(hours: 1),
     );
-    _listenForSender();
+    // _listenForSender();
   }
 
   @override
@@ -217,7 +217,7 @@ class _ImageWheelState extends State<ImageWheel> {
                     Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(22.0),
                         child: Image.asset("assets/images/Genix.gif"),
                       ),
                     ),
@@ -322,7 +322,7 @@ class _ImageWheelState extends State<ImageWheel> {
                                   padding: EdgeInsets.all(6.0.w),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(22.0),
                                   child: Text(
                                     isSpinning ? "Spinning..." : "Start",
                                     style: TextStyle(color: Colors.white),
